@@ -20,7 +20,7 @@ var configs = oauth.Config{
 	RequestPath:          "/oauth/{provider}",
 	RequestPathParam:     "provider",
 	CallbackRelativePath: "/callback",
-	RouteName:            "oauth", // for {{ url "oauth"}} in tempaltes
+	RouteName:            "oauth", // for {{ url "oauth"}} in templates
 
 	GithubKey:    "YOUR_GITHUB_KEY",
 	GithubSecret: "YOUR_GITHUB_SECRET",
