@@ -1,6 +1,6 @@
 <a href="https://travis-ci.org/iris-contrib/adaptors"><img src="https://img.shields.io/travis/iris-contrib/adaptors.svg?style=flat-square" alt="Build Status"></a>
 <a href="https://github.com/iris-contrib/adaptors/blob/master/LICENSE"><img src="https://img.shields.io/badge/%20license-MIT%20%20License%20-E91E63.svg?style=flat-square" alt="License"></a>
-<a href="https://github.com/iris-contrib/adaptors/releases"><img src="https://img.shields.io/badge/%20compatible%20Iris%20Version%20-%20v6-blue.svg?style=flat-square" alt="Current Iris Release"></a>
+<a href="https://github.com/kataras/iris/blob/v6/HISTORY.md"><img src="https://img.shields.io/badge/codename-√Νεxτ%20-blue.svg?style=flat-square" alt="CHANGELOG/HISTORY"></a>
 
 
 
@@ -8,7 +8,7 @@ This repository provides a way to share your [Iris](https://github.com/kataras/i
 
 Installation
 ------------
-The only requirement is the [Go Programming Language](https://golang.org/dl), at least 1.7.
+The only requirement is the [Go Programming Language](https://golang.org/dl), at least 1.8
 
 ```bash
 $ go get github.com/iris-contrib/adaptors/...
