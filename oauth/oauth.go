@@ -76,13 +76,20 @@ func (p *Oauth) boot(s *iris.Framework) {
 	if len(oauthProviders) > 0 {
 		goth.UseProviders(oauthProviders...)
 		// set the mux path to handle the registered providers
-		s.Get(p.Config.RequestPath, func(ctx *iris.Context) {
+
+		//Expected behavior
+		//http://domain.com  /ROUTE /  {provider}
+		//     VHOST        REQ PATH    PARAM
+		//println("Config is : requPath = " +p.Config.RequestPath)
+
+		s.Get(p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}", func(ctx *iris.Context) {
 			err := p.BeginAuthHandler(ctx)
 			if err != nil {
 				s.Log(iris.DevMode, "oauth adaptor runtime error on '"+ctx.Path()+"'. Trace: "+err.Error())
 			}
 		}).ChangeName(p.Config.RouteName)
-		//println("registered " + p.Config.Path + "/:provider")
+
+		//println("registered " + p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}")
 
 		authMiddleware := func(ctx *iris.Context) {
 			user, err := p.CompleteUserAuth(ctx)
@@ -97,8 +104,16 @@ func (p *Oauth) boot(s *iris.Framework) {
 
 		p.successHandlers = append([]iris.HandlerFunc{authMiddleware}, p.successHandlers...)
 
-		s.Get(p.Config.RequestPath+p.Config.CallbackRelativePath, p.successHandlers...)
+		//Expected behavior
+		//http://domain.com  /ROUTE   {provider}      /callback
+		//     VHOST        REQ PATH    PARAM     CALLBACKRELATIVE
+		//println("Config is : requPath = " +p.Config.RequestPath)
+		//println("param name = "+p.Config.RequestPathParam)
+		//println("callback relative = "+ p.Config.CallbackRelativePath)
+
+		s.Get(p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}"+p.Config.CallbackRelativePath, p.successHandlers...)
 		p.station = s
+		//println("registered " + p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}"+p.Config.CallbackRelativePath)
 		// register the error handler
 		if p.failHandler != nil {
 			s.OnError(iris.StatusUnauthorized, p.failHandler)
@@ -137,7 +152,7 @@ func (p *Oauth) GetAuthURL(ctx *iris.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	//println("Provider name is : "+providerName)
 	provider, err := goth.GetProvider(providerName)
 	if err != nil {
 		return "", err

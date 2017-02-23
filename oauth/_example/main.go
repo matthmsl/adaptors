@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/iris-contrib/adaptors/oauth"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/gorillamux"
-	"github.com/iris-contrib/adaptors/oauth"
 )
 
 // IMPORTANT: Some website providers aren't allow localhost or 127.0.0.1 .
@@ -16,15 +16,22 @@ import (
 
 // all configuration is ready, you have to set only:
 //  RequestPath,CallbackRelativePath and the ___Key and __Secret
+
+// This config will generate two routes :
+// 	- /oauth/{provider}
+//      - /oauth/{provider}/callback
+
+// BEWARE : DO NOT DUPLICATE PROVIDERS' NAMES
+
 var configs = oauth.Config{
-	RequestPath:          "/oauth/{provider}",
+	RequestPath:          "/oauth",
 	RequestPathParam:     "provider",
 	CallbackRelativePath: "/callback",
-	RouteName:            "oauth", // for {{ url "oauth"}} in templates
+	RouteName:            "oauth",
 
 	GithubKey:    "YOUR_GITHUB_KEY",
 	GithubSecret: "YOUR_GITHUB_SECRET",
-	GithubName:   "github", // defaults to github
+	GithubName:   "github", // Actually changes the provider name for URL provider param. Defaults to github
 
 	FacebookKey:    "YOUR_FACEBOOK_KEY",
 	FacebookSecret: "YOUR_FACEBOOK_KEY",
