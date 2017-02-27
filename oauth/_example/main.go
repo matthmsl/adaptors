@@ -4,9 +4,11 @@ import (
 	"sort"
 	"strings"
 
+	"fmt"
 	"github.com/iris-contrib/adaptors/oauth"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/gorillamux"
+	"gopkg.in/kataras/iris.v6/adaptors/sessions"
 )
 
 // IMPORTANT: Some website providers aren't allow localhost or 127.0.0.1 .
@@ -52,10 +54,36 @@ func main() {
 	app := iris.New()
 	app.Adapt(iris.DevLogger())
 	app.Adapt(gorillamux.New()) // adapt a router, order doesn't matters but before Listen.
+	//app.Adapt(httprouter.New()) You can also use httprouter
 	// create the adaptor with our configs
 	authentication := oauth.New(configs)
 	// register the oauth/oauth2 adaptor
 	app.Adapt(authentication)
+
+	//This function will be triggered before your user logs in.
+	authentication.Use(func(c *iris.Context) {
+		fmt.Println("Hello handler !")
+		c.Next() //Don't forget this line to continue the authentication process
+	})
+
+	mySessions := sessions.New(sessions.Config{
+		// Cookie string, the session's client cookie name, for example: "mysessionid"
+		//
+		// Defaults to "gosessionid"
+		Cookie: "mysessionid",
+		// base64 urlencoding,
+		// if you have strange name cookie name enable this
+		DecodeCookie: false,
+		// it's time.Duration, from the time cookie is created, how long it can be alive?
+		// 0 means no expire.
+		Expires: 0,
+		// the length of the sessionid's cookie's value
+		CookieLength: 32,
+		// if you want to invalid cookies on different subdomains
+		// of the same host, then enable it
+		DisableSubdomainPersistence: false,
+	})
+	app.Adapt(mySessions)
 
 	// set a  login success handler( you can use more than one handler)
 	// if user succeed to logged in
