@@ -90,7 +90,7 @@ func (p *Oauth) boot(s *iris.Framework) {
 		//     VHOST        REQ PATH    PARAM
 		//println("Config is : requPath = " +p.Config.RequestPath)
 		var firstSeparator, secondSeparator string
-		if s.Config.Other(iris.RouterNameConfigKey) == "gorillamux" {
+		if s.Config.Other[iris.RouterNameConfigKey] == "gorillamux" {
 			firstSeparator = "{"
 			secondSeparator = "}"
 		} else {
