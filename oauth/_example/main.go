@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/iris-contrib/adaptors/oauth"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/gorillamux"
@@ -69,7 +70,7 @@ func main() {
 	mySessions := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
-		// Defaults to "gosessionid"
+		// Defaults to "irissessionid"
 		Cookie: "mysessionid",
 		// base64 urlencoding,
 		// if you have strange name cookie name enable this

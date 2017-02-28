@@ -34,10 +34,11 @@ import (
 
 const (
 
-	// DefaultPath /oauth
+	// DefaultRouteName /oauth
 	//DefaultPath = "/oauth"
 	// DefaultRouteName oauth
-	DefaultRouteName        = "oauth"
+	DefaultRouteName = "oauth"
+	// DefaultRequestParamPath is the default named path parameter for the url provider
 	DefaultRequestParamPath = "provider"
 	// DefaultContextKey oauth_user
 	DefaultContextKey = "oauth_user"

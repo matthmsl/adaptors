@@ -89,15 +89,7 @@ func (p *Oauth) boot(s *iris.Framework) {
 		//http://domain.com  /ROUTE /  {provider}
 		//     VHOST        REQ PATH    PARAM
 		//println("Config is : requPath = " +p.Config.RequestPath)
-		var firstSeparator, secondSeparator string
-		if s.Config.Other[iris.RouterNameConfigKey] == "gorillamux" {
-			firstSeparator = "{"
-			secondSeparator = "}"
-		} else {
-			firstSeparator = ":"
-			secondSeparator = ""
-		}
-		s.Get(p.Config.RequestPath+"/"+firstSeparator+p.Config.RequestPathParam+secondSeparator, p.middleware, func(ctx *iris.Context) {
+		s.Get(p.Config.RequestPath+"/"+s.RouteParam(p.Config.RequestPathParam), p.middleware, func(ctx *iris.Context) {
 			err := p.BeginAuthHandler(ctx)
 			if err != nil {
 				s.Log(iris.DevMode, "oauth adaptor runtime error on '"+ctx.Path()+"'. Trace: "+err.Error())
@@ -126,9 +118,8 @@ func (p *Oauth) boot(s *iris.Framework) {
 		//println("param name = "+p.Config.RequestPathParam)
 		//println("callback relative = "+ p.Config.CallbackRelativePath)
 
-		s.Get(p.Config.RequestPath+"/"+firstSeparator+p.Config.RequestPathParam+secondSeparator+p.Config.CallbackRelativePath, p.successHandlers...)
+		s.Get(p.Config.RequestPath+"/"+s.RouteParam(p.Config.RequestPathParam)+p.Config.CallbackRelativePath, p.successHandlers...)
 		p.station = s
-		//println("registered " + p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}"+p.Config.CallbackRelativePath)
 		// register the error handler
 		if p.failHandler != nil {
 			s.OnError(iris.StatusUnauthorized, p.failHandler)
