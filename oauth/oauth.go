@@ -15,13 +15,16 @@ type Oauth struct {
 	successHandlers []iris.HandlerFunc
 	failHandler     iris.HandlerFunc
 	station         *iris.Framework
+	middleware      iris.HandlerFunc
 }
 
 // New returns a new OAuth Oauth
 // receives one parameter of type 'Config'
 func New(cfg Config) *Oauth {
 	c := DefaultConfig().MergeSingle(cfg)
-	return &Oauth{Config: c}
+	//Set default middleware
+	middleware := func(c *iris.Context) { c.Next() }
+	return &Oauth{Config: c, middleware: middleware}
 }
 
 // Success registers handler(s) which fires when the user logged in successfully
@@ -33,6 +36,11 @@ func (p *Oauth) Success(handlersFn ...iris.HandlerFunc) {
 // underhood it justs registers an error handler to the StatusUnauthorized(400 status code), same as 'iris.Default.OnError(400,handler)'
 func (p *Oauth) Fail(handler iris.HandlerFunc) {
 	p.failHandler = handler
+}
+
+//Use registers a handler which fires before the user logs in
+func (p *Oauth) Use(handler iris.HandlerFunc) {
+	p.middleware = handler
 }
 
 // User returns the user for the particular client
@@ -76,13 +84,27 @@ func (p *Oauth) boot(s *iris.Framework) {
 	if len(oauthProviders) > 0 {
 		goth.UseProviders(oauthProviders...)
 		// set the mux path to handle the registered providers
-		s.Get(p.Config.RequestPath, func(ctx *iris.Context) {
+
+		//Expected behavior
+		//http://domain.com  /ROUTE /  {provider}
+		//     VHOST        REQ PATH    PARAM
+		//println("Config is : requPath = " +p.Config.RequestPath)
+		var firstSeparator, secondSeparator string
+		if s.Config.Other[iris.RouterNameConfigKey] == "gorillamux" {
+			firstSeparator = "{"
+			secondSeparator = "}"
+		} else {
+			firstSeparator = ":"
+			secondSeparator = ""
+		}
+		s.Get(p.Config.RequestPath+"/"+firstSeparator+p.Config.RequestPathParam+secondSeparator, p.middleware, func(ctx *iris.Context) {
 			err := p.BeginAuthHandler(ctx)
 			if err != nil {
 				s.Log(iris.DevMode, "oauth adaptor runtime error on '"+ctx.Path()+"'. Trace: "+err.Error())
 			}
 		}).ChangeName(p.Config.RouteName)
-		//println("registered " + p.Config.Path + "/:provider")
+
+		//println("registered " + p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}")
 
 		authMiddleware := func(ctx *iris.Context) {
 			user, err := p.CompleteUserAuth(ctx)
@@ -97,8 +119,16 @@ func (p *Oauth) boot(s *iris.Framework) {
 
 		p.successHandlers = append([]iris.HandlerFunc{authMiddleware}, p.successHandlers...)
 
-		s.Get(p.Config.RequestPath+p.Config.CallbackRelativePath, p.successHandlers...)
+		//Expected behavior
+		//http://domain.com  /ROUTE   {provider}      /callback
+		//     VHOST        REQ PATH    PARAM     CALLBACKRELATIVE
+		//println("Config is : requPath = " +p.Config.RequestPath)
+		//println("param name = "+p.Config.RequestPathParam)
+		//println("callback relative = "+ p.Config.CallbackRelativePath)
+
+		s.Get(p.Config.RequestPath+"/"+firstSeparator+p.Config.RequestPathParam+secondSeparator+p.Config.CallbackRelativePath, p.successHandlers...)
 		p.station = s
+		//println("registered " + p.Config.RequestPath+"/{"+p.Config.RequestPathParam+"}"+p.Config.CallbackRelativePath)
 		// register the error handler
 		if p.failHandler != nil {
 			s.OnError(iris.StatusUnauthorized, p.failHandler)
@@ -137,7 +167,7 @@ func (p *Oauth) GetAuthURL(ctx *iris.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	//println("Provider name is : "+providerName)
 	provider, err := goth.GetProvider(providerName)
 	if err != nil {
 		return "", err

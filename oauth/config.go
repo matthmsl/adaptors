@@ -35,9 +35,10 @@ import (
 const (
 
 	// DefaultPath /oauth
-	DefaultPath = "/oauth"
+	//DefaultPath = "/oauth"
 	// DefaultRouteName oauth
-	DefaultRouteName = "oauth"
+	DefaultRouteName        = "oauth"
+	DefaultRequestParamPath = "provider"
 	// DefaultContextKey oauth_user
 	DefaultContextKey = "oauth_user"
 )
@@ -53,9 +54,9 @@ type Config struct {
 	// adaptors and some works with : other with {}
 	// and who knows how many of them the users will adapt to iris, so ask for explicit paths here.
 
-	// RequestPath for example "/auth/:provider"
+	// RequestPath for example "/auth/{provider}"
 	RequestPath      string
-	RequestPathParam string // if RequestPath is: "/auth/:provider" then this field should be "provider""
+	RequestPathParam string // if RequestPath is: "/auth/{provider}" then this field should be "provider""
 	// CallbackRelativePath relative to RequestPath, for example "/callback"
 	// it will convert to: "/auth/facebook/callback" if facebook provider.
 	CallbackRelativePath string
@@ -127,6 +128,7 @@ func DefaultConfig() Config {
 		GitlabName:       "gitlab",
 		RouteName:        DefaultRouteName,
 		ContextKey:       DefaultContextKey,
+		RequestPathParam: DefaultRequestParamPath,
 	}
 }
 
@@ -143,92 +145,204 @@ func (c Config) MergeSingle(cfg Config) (config Config) {
 //
 // receives one parameter which is the host from the server,ex: http://localhost:3000, will be used as prefix for the oauth callback
 func (c Config) GenerateProviders(vhost string) (providers []goth.Provider) {
-
 	getCallbackURL := func(providerName string) string {
-		return vhost + c.RequestPath + "/" + providerName + "/" + c.CallbackRelativePath
+		//println("Registered : "+ vhost + c.RequestPath + "/" + providerName + c.CallbackRelativePath)
+		return vhost + c.RequestPath + "/" + providerName + c.CallbackRelativePath
 	}
 
 	//we could use a map but that's easier for the users because of code completion of their IDEs/editors
+
+	//Contributor's note.
+	//Next time I have to rewrite it... I make a map anyway... My hand hurts because of copy/paste...
+
 	if c.TwitterKey != "" && c.TwitterSecret != "" {
-		providers = append(providers, twitter.New(c.TwitterKey, c.TwitterSecret, getCallbackURL(c.TwitterName)))
+		provider := twitter.New(c.TwitterKey, c.TwitterSecret, getCallbackURL(c.TwitterName))
+		if c.TwitterName != "" {
+			provider.SetName(c.TwitterName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.FacebookKey != "" && c.FacebookSecret != "" {
-		providers = append(providers, facebook.New(c.FacebookKey, c.FacebookSecret, getCallbackURL(c.FacebookName)))
+		provider := facebook.New(c.FacebookKey, c.FacebookSecret, getCallbackURL(c.FacebookName))
+		if c.FacebookName != "" {
+			provider.SetName(c.FacebookName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.GplusKey != "" && c.GplusSecret != "" {
-		providers = append(providers, gplus.New(c.GplusKey, c.GplusSecret, getCallbackURL(c.GplusName)))
+		provider := gplus.New(c.GplusKey, c.GplusSecret, getCallbackURL(c.GplusName))
+		if c.GplusName != "" {
+			provider.SetName(c.GplusName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.GithubKey != "" && c.GithubSecret != "" {
-		providers = append(providers, github.New(c.GithubKey, c.GithubSecret, getCallbackURL(c.GithubName)))
+		provider := github.New(c.GithubKey, c.GithubSecret, getCallbackURL(c.GithubName))
+		if c.GithubName != "" {
+			provider.SetName(c.GithubName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.SpotifyKey != "" && c.SpotifySecret != "" {
-		providers = append(providers, spotify.New(c.SpotifyKey, c.SpotifySecret, getCallbackURL(c.SpotifyName)))
+		provider := spotify.New(c.SpotifyKey, c.SpotifySecret, getCallbackURL(c.SpotifyName))
+		if c.SpotifyName != "" {
+			provider.SetName(c.SpotifyName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.LinkedinKey != "" && c.LinkedinSecret != "" {
-		providers = append(providers, linkedin.New(c.LinkedinKey, c.LinkedinSecret, getCallbackURL(c.LinkedinName)))
+		provider := linkedin.New(c.LinkedinKey, c.LinkedinSecret, getCallbackURL(c.LinkedinName))
+		if c.LinkedinName != "" {
+			provider.SetName(c.LinkedinName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.LastfmKey != "" && c.LastfmSecret != "" {
-		providers = append(providers, lastfm.New(c.LastfmKey, c.LastfmSecret, getCallbackURL(c.LastfmName)))
+		provider := lastfm.New(c.LastfmKey, c.LastfmSecret, getCallbackURL(c.LastfmName))
+		if c.LastfmName != "" {
+			provider.SetName(c.LastfmName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.TwitchKey != "" && c.TwitchSecret != "" {
-		providers = append(providers, twitch.New(c.TwitchKey, c.TwitchSecret, getCallbackURL(c.TwitchName)))
+		provider := twitch.New(c.TwitchKey, c.TwitchSecret, getCallbackURL(c.TwitchName))
+		if c.TwitchName != "" {
+			provider.SetName(c.TwitchName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.DropboxKey != "" && c.DropboxSecret != "" {
-		providers = append(providers, dropbox.New(c.DropboxKey, c.DropboxSecret, getCallbackURL(c.DropboxName)))
+		provider := dropbox.New(c.DropboxKey, c.DropboxSecret, getCallbackURL(c.DropboxName))
+		if c.DropboxName != "" {
+			provider.SetName(c.DropboxName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.DigitaloceanKey != "" && c.DigitaloceanSecret != "" {
-		providers = append(providers, digitalocean.New(c.DigitaloceanKey, c.DigitaloceanSecret, getCallbackURL(c.DigitaloceanName)))
+		provider := digitalocean.New(c.DigitaloceanKey, c.DigitaloceanSecret, getCallbackURL(c.DigitaloceanName))
+		if c.DigitaloceanName != "" {
+			provider.SetName(c.DigitaloceanName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.BitbucketKey != "" && c.BitbucketSecret != "" {
-		providers = append(providers, bitbucket.New(c.BitbucketKey, c.BitbucketSecret, getCallbackURL(c.BitbucketName)))
+		provider := bitbucket.New(c.BitbucketKey, c.BitbucketSecret, getCallbackURL(c.BitbucketName))
+		if c.BitbucketName != "" {
+			provider.SetName(c.BitbucketName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.InstagramKey != "" && c.InstagramSecret != "" {
-		providers = append(providers, instagram.New(c.InstagramKey, c.InstagramSecret, getCallbackURL(c.InstagramName)))
+		provider := instagram.New(c.InstagramKey, c.InstagramSecret, getCallbackURL(c.InstagramName))
+		if c.InstagramName != "" {
+			provider.SetName(c.InstagramName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.BoxKey != "" && c.BoxSecret != "" {
-		providers = append(providers, box.New(c.BoxKey, c.BoxSecret, getCallbackURL(c.BoxName)))
+		provider := box.New(c.BoxKey, c.BoxSecret, getCallbackURL(c.BoxName))
+		if c.BoxName != "" {
+			provider.SetName(c.BoxName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.SalesforceKey != "" && c.SalesforceSecret != "" {
-		providers = append(providers, salesforce.New(c.SalesforceKey, c.SalesforceSecret, getCallbackURL(c.SalesforceName)))
+		provider := salesforce.New(c.SalesforceKey, c.SalesforceSecret, getCallbackURL(c.SalesforceName))
+		if c.SalesforceName != "" {
+			provider.SetName(c.SalesforceName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.AmazonKey != "" && c.AmazonSecret != "" {
-		providers = append(providers, amazon.New(c.AmazonKey, c.AmazonSecret, getCallbackURL(c.AmazonName)))
+		provider := amazon.New(c.AmazonKey, c.AmazonSecret, getCallbackURL(c.AmazonName))
+		if c.AmazonName != "" {
+			provider.SetName(c.AmazonName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.YammerKey != "" && c.YammerSecret != "" {
-		providers = append(providers, yammer.New(c.YammerKey, c.YammerSecret, getCallbackURL(c.YammerName)))
+		provider := yammer.New(c.YammerKey, c.YammerSecret, getCallbackURL(c.YammerName))
+		if c.YammerName != "" {
+			provider.SetName(c.YammerName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.OneDriveKey != "" && c.OneDriveSecret != "" {
-		providers = append(providers, onedrive.New(c.OneDriveKey, c.OneDriveSecret, getCallbackURL(c.OneDriveName)))
+		provider := onedrive.New(c.OneDriveKey, c.OneDriveSecret, getCallbackURL(c.OneDriveName))
+		if c.YammerName != "" {
+			provider.SetName(c.OneDriveName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.YahooKey != "" && c.YahooSecret != "" {
-		providers = append(providers, yahoo.New(c.YahooKey, c.YahooSecret, getCallbackURL(c.YahooName)))
+		provider := yahoo.New(c.YahooKey, c.YahooSecret, getCallbackURL(c.YahooName))
+		if c.YahooName != "" {
+			provider.SetName(c.YahooName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.SlackKey != "" && c.SlackSecret != "" {
-		providers = append(providers, slack.New(c.SlackKey, c.SlackSecret, getCallbackURL(c.SlackName)))
+		provider := slack.New(c.SlackKey, c.SlackSecret, getCallbackURL(c.SlackName))
+		if c.SlackName != "" {
+			provider.SetName(c.SlackName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.StripeKey != "" && c.StripeSecret != "" {
-		providers = append(providers, stripe.New(c.StripeKey, c.StripeSecret, getCallbackURL(c.StripeName)))
+		provider := stripe.New(c.StripeKey, c.StripeSecret, getCallbackURL(c.StripeName))
+		if c.StripeName != "" {
+			provider.SetName(c.StripeName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.WepayKey != "" && c.WepaySecret != "" {
-		providers = append(providers, wepay.New(c.WepayKey, c.WepaySecret, getCallbackURL(c.WepayName)))
+		provider := wepay.New(c.WepayKey, c.WepaySecret, getCallbackURL(c.WepayName))
+		if c.WepayName != "" {
+			provider.SetName(c.WepayName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.PaypalKey != "" && c.PaypalSecret != "" {
-		providers = append(providers, paypal.New(c.PaypalKey, c.PaypalSecret, getCallbackURL(c.PaypalName)))
+		provider := paypal.New(c.PaypalKey, c.PaypalSecret, getCallbackURL(c.PaypalName))
+		if c.PaypalName != "" {
+			provider.SetName(c.PaypalName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.SteamKey != "" {
-		providers = append(providers, steam.New(c.SteamKey, getCallbackURL(c.SteamName)))
+		provider := steam.New(c.SteamKey, getCallbackURL(c.SteamName))
+		if c.SteamName != "" {
+			provider.SetName(c.SteamName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.HerokuKey != "" && c.HerokuSecret != "" {
-		providers = append(providers, heroku.New(c.HerokuKey, c.HerokuSecret, getCallbackURL(c.HerokuName)))
+		provider := heroku.New(c.HerokuKey, c.HerokuSecret, getCallbackURL(c.HerokuName))
+		if c.HerokuName != "" {
+			provider.SetName(c.HerokuName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.UberKey != "" && c.UberSecret != "" {
-		providers = append(providers, uber.New(c.UberKey, c.UberSecret, getCallbackURL(c.UberName)))
+		provider := uber.New(c.UberKey, c.UberSecret, getCallbackURL(c.UberName))
+		if c.UberName != "" {
+			provider.SetName(c.UberName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.SoundcloudKey != "" && c.SoundcloudSecret != "" {
-		providers = append(providers, soundcloud.New(c.SoundcloudKey, c.SoundcloudSecret, getCallbackURL(c.SoundcloudName)))
+		provider := soundcloud.New(c.SoundcloudKey, c.SoundcloudSecret, getCallbackURL(c.SoundcloudName))
+		if c.SoundcloudName != "" {
+			provider.SetName(c.SoundcloudName)
+		}
+		providers = append(providers, provider)
 	}
 	if c.GitlabKey != "" && c.GitlabSecret != "" {
-		providers = append(providers, gitlab.New(c.GitlabKey, c.GitlabSecret, getCallbackURL(c.GithubName)))
+		provider := gitlab.New(c.GitlabKey, c.GitlabSecret, getCallbackURL(c.GitlabName))
+		if c.GitlabName != "" {
+			provider.SetName(c.GitlabName)
+		}
+		providers = append(providers, provider)
 	}
 
 	return
