@@ -32,6 +32,10 @@ var configs = oauth.Config{
 	CallbackRelativePath: "/callback",
 	RouteName:            "oauth",
 
+	//OPTIONAL || Set this parameter if iris is accessible via another address than the one specified in
+	// .Listen()
+	FQDN:	"yourdomain.tld",
+
 	GithubKey:    "YOUR_GITHUB_KEY",
 	GithubSecret: "YOUR_GITHUB_SECRET",
 	GithubName:   "github", // Actually changes the provider name for URL provider param. Defaults to github
@@ -72,9 +76,6 @@ func main() {
 		//
 		// Defaults to "irissessionid"
 		Cookie: "mysessionid",
-		// base64 urlencoding,
-		// if you have strange name cookie name enable this
-		DecodeCookie: false,
 		// it's time.Duration, from the time cookie is created, how long it can be alive?
 		// 0 means no expire.
 		Expires: 0,

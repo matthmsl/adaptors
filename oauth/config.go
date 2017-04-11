@@ -61,6 +61,9 @@ type Config struct {
 	// CallbackRelativePath relative to RequestPath, for example "/callback"
 	// it will convert to: "/auth/facebook/callback" if facebook provider.
 	CallbackRelativePath string
+	//User can provide a Full Qualified Domain Name to set a callback path other than the one provided with
+	//iris.Listen()
+	FQDN string
 
 	TwitterKey, TwitterSecret, TwitterName                string
 	FacebookKey, FacebookSecret, FacebookName             string

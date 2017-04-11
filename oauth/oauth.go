@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/go-errors"
 	"github.com/markbates/goth"
 	"gopkg.in/kataras/iris.v6"
+	"strings"
 )
 
 // SessionValueKey is the key used to access the session store.
@@ -80,7 +81,13 @@ func (p *Oauth) boot(s *iris.Framework) {
 		s.Log(iris.ProdMode, "oauth adaptor disabled: Config.RequestPath or/and RequestPathParam or/and Config.CallbackRelativePath are empty,\nplease set them and restart the app")
 		return
 	}
-	oauthProviders := p.Config.GenerateProviders(s.Config.VScheme + s.Config.VHost)
+	var oauthProviders []goth.Provider
+	if p.Config.FQDN==""{
+		oauthProviders = p.Config.GenerateProviders(s.Config.VScheme + s.Config.VHost)
+	}else{
+		VHost := strings.Split(s.Config.VHost,":")
+		oauthProviders = p.Config.GenerateProviders(s.Config.VScheme + p.Config.FQDN + VHost[1])
+	}
 	if len(oauthProviders) > 0 {
 		goth.UseProviders(oauthProviders...)
 		// set the mux path to handle the registered providers
